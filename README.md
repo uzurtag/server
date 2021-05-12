@@ -3,9 +3,7 @@
 - Create, Remove, Change Todos;
 - Create, Remove Status Blocks;
 
-###Code Blocks (multi-language) & highlighting
-
-####Inline code
+### Install
 
 `$ npm install`
 
