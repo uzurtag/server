@@ -4,6 +4,7 @@ const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLList, GraphQLID 
 
 const Todo = require('../models/todo');
 const Board = require('../models/board');
+const googleApi = require('../integration/google_calendar');
 
 const TodoType = new GraphQLObjectType({
     'name': 'Todo',
@@ -79,6 +80,7 @@ const Mutation = new GraphQLObjectType({
                     status: args.status,
                     date: args.date,
                 });
+                googleApi.insertEvent(todo);
                 return todo.save();
             }
         },
