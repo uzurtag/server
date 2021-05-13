@@ -1,6 +1,6 @@
 const graphql = require('graphql');
 
-const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLList, GraphQLID } = graphql;
+const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLList, GraphQLID, GraphQLBoolean } = graphql;
 
 const Todo = require('../models/todo');
 const Board = require('../models/board');
@@ -14,6 +14,7 @@ const TodoType = new GraphQLObjectType({
         description: { type: GraphQLString },
         status: { type: GraphQLString },
         date: { type: GraphQLString },
+        sync: { type: GraphQLBoolean },
     }),
 });
 
@@ -25,6 +26,7 @@ const TodosType = new GraphQLObjectType({
         description: { type: GraphQLString },
         status: { type: GraphQLString },
         date: { type: GraphQLString },
+        sync: { type: GraphQLBoolean },
     }),
 });
 
@@ -72,6 +74,7 @@ const Mutation = new GraphQLObjectType({
                 description: { type: GraphQLString },
                 status: { type: GraphQLString },
                 date: { type: GraphQLString },
+                sync: { type: GraphQLBoolean },
             },
             resolve(parent, args) {
                 const todo = new Todo({
@@ -79,8 +82,8 @@ const Mutation = new GraphQLObjectType({
                     description: args.description,
                     status: args.status,
                     date: args.date,
+                    sync: args.sync,
                 });
-                googleApi.insertEvent(todo);
                 return todo.save();
             }
         },
@@ -110,6 +113,28 @@ const Mutation = new GraphQLObjectType({
                 return Todo.findByIdAndUpdate(
                     args.id,
                     { $set: { status: args.status } },
+                    { new: true }
+                );
+            }
+        },
+        sync: {
+            type: TodoType,
+            args: {
+                id: { type: GraphQLID },
+                sync: { type: GraphQLBoolean },
+            },
+            resolve(parent, args, context) {
+                Todo.findById(args.id).exec((err, todo) => {
+                    if (!todo) {
+                        return res.status(404).json({ "message": "todo not found" });
+                    } else if (err) {
+                        return res.status(404).json(err);
+                    }
+                    googleApi.insertEvent(todo);
+                });
+                return Todo.findByIdAndUpdate(
+                    args.id,
+                    { $set: { sync: args.sync } },
                     { new: true }
                 );
             }

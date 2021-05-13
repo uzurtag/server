@@ -6,6 +6,7 @@ const todoSchema = new Schema({
     description: String,
     status: String,
     date: String,
+    sync: Boolean,
 });
 
 module.exports = mongoose.model('Todo', todoSchema, 'todo');
